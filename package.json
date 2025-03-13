@@ -1,0 +1,27 @@
+{
+  "name": "triple-k",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "dependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "three": "^0.174.0",
+    "typescript": "^5.8.2",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.10.1",
+    "@types/three": "^0.174.0",
+    "eslint": "^9.22.0",
+    "less": "^4.2.2",
+    "vite": "^6.2.1"
+  }
+}
