@@ -1,13 +1,47 @@
 <script setup lang="ts">
+import { usePointerEvent } from '@/composables/usePointerEvent'
 import mainScene from '@/scenes/test'
 import * as THREE from 'three'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
-import { reactive, ref, shallowReactive } from 'vue'
+import { onUnmounted, shallowReactive } from 'vue'
 import '@/assets/styles/index.less'
 
-mainScene.active()
+let pointerX = 0
+let pointerXOnPointerDown = 0
+let pointerY = 0
+let pointerYOnPointerDown = 0
+const windowHalfX = window.innerWidth / 2
+const windowHalfY = window.innerHeight / 2
+let targetRotationX = 0
+let targetRotationY = 0
+let targetRotationOnPointerDownX = 0
+let targetRotationOnPointerDownY = 0
+const group = new THREE.Group()
 
+mainScene.addGameObject(group)
+
+const { dispose } = usePointerEvent(document.body, (event) => {
+  if (event.isPrimary === false)
+    return
+
+  pointerXOnPointerDown = event.clientX - windowHalfX
+  pointerYOnPointerDown = event.clientY - windowHalfY
+  targetRotationOnPointerDownX = targetRotationX
+  targetRotationOnPointerDownY = targetRotationY
+}, (event) => {
+  pointerX = event.clientX - windowHalfX
+  pointerY = event.clientY - windowHalfY
+  targetRotationX = targetRotationOnPointerDownX + (pointerX - pointerXOnPointerDown) * 0.02
+  targetRotationY = targetRotationOnPointerDownY + (pointerY - pointerYOnPointerDown) * 0.02
+}, () => {
+})
+
+mainScene.active(() => {
+  group.rotation.y += (targetRotationX - group.rotation.y) * 0.05
+  group.rotation.x += (targetRotationY - group.rotation.x) * 0.05
+})
+mainScene.renderer.setClearColor(0xAAAAAA)
 // #region Geometry
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 const material = new THREE.MeshBasicMaterial({ color: 0x00FF00 })
@@ -29,31 +63,30 @@ const lineGeometry = new THREE.Line(new THREE.BufferGeometry().setFromPoints(poi
 // #region Text
 const fontLoader = new FontLoader()
 
-const textMesh = ref<THREE.Mesh>()
+let textMesh: THREE.Mesh
 
-const testCases = shallowReactive<TestCase[]>([{ elem: cubeMesh, name: 'cube' }, { elem: lineGeometry, name: 'line' }, { elem: textMesh.value!, name: 'text' }])
+const testCases = shallowReactive<TestCase[]>([{ elem: cubeMesh, name: 'cube' }, { elem: lineGeometry, name: 'line' }, { elem: textMesh!, name: 'text' }])
 
 fontLoader.load('./assets/fonts/gentilis_bold.typeface.json', (font) => {
-  const textGeometry = new TextGeometry('Hello World', {
+  const textGeometry = new TextGeometry('KKK', {
     font,
-    size: 80,
-    depth: 5,
-    curveSegments: 12,
-    bevelEnabled: true,
-    bevelThickness: 10,
-    bevelSize: 8,
-    bevelOffset: 0,
-    bevelSegments: 5,
+    size: 1,
+    depth: 0.5,
   })
 
   textGeometry.computeBoundingBox()
+  const centerOffsetX = -0.5 * (textGeometry.boundingBox!.max.x - textGeometry.boundingBox!.min.x)
+  const centerOffsetY = -0.5 * (textGeometry.boundingBox!.max.y - textGeometry.boundingBox!.min.y)
+  textGeometry.translate(centerOffsetX, centerOffsetY, 0)
 
-  textMesh.value = new THREE.Mesh(textGeometry, [
+  textMesh = new THREE.Mesh(textGeometry, [
     new THREE.MeshPhongMaterial({ color: 0xFFFFFF, flatShading: true }), // front
     new THREE.MeshPhongMaterial({ color: 0xFFFFFF }), // side
   ])
 
-  testCases.find(item => item.name === 'text')!.elem = textMesh.value!
+  textMesh.position.set(0, 0, 0)
+
+  testCases.find(item => item.name === 'text')!.elem = textMesh
 })
 // #endregion
 
@@ -65,13 +98,18 @@ interface TestCase {
 function toggleTestCase(tar: THREE.Object3D) {
   testCases.forEach((item) => {
     if (item.elem !== tar) {
-      mainScene.removeGameObject(item.elem)
+      group.remove(item.elem)
     }
     else {
-      mainScene.addGameObject(item.elem)
+      group.add(item.elem)
+      item.elem.position.set(0, 0, 0)
     }
   })
 }
+
+onUnmounted(() => {
+  dispose()
+})
 </script>
 
 <template>
