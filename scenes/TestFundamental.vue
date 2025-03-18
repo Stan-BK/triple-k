@@ -5,6 +5,7 @@ import { SceneFactory } from '@/constructors/factory'
 import * as THREE from 'three'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import { onUnmounted, ref, shallowReactive, watch } from 'vue'
 import '@/assets/styles/index.less'
 
@@ -39,7 +40,6 @@ const { dispose } = usePointerEvent(document.body, (event) => {
   if (event.isPrimary === false)
     return
 
-  console.log(group.rotation.x, group.rotation.y, group.rotation.z)
   isPointerDown = true
   stopRotate()
 
@@ -94,13 +94,14 @@ points.push(new THREE.Vector3(10, 0, 0))
 const lineGeometry = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), new THREE.LineBasicMaterial({ color: 0x0000FF }))
 // #endregion
 
+const testCases = shallowReactive<TestCase[]>([{ elem: cubeMesh, name: 'cube' }, { elem: lineGeometry, name: 'line' }, { elem: null!, name: 'text' }, { elem: null!, name: '3dModel' }])
+
 // #region Text
 const fontLoader = new FontLoader()
 
 let textMesh: THREE.Mesh
 let textMaterials: THREE.MeshPhongMaterial[] = [] // 存储材质引用
 
-const testCases = shallowReactive<TestCase[]>([{ elem: cubeMesh, name: 'cube' }, { elem: lineGeometry, name: 'line' }, { elem: textMesh!, name: 'text' }])
 const textColor = ref('#FF0000')
 
 // 添加更新颜色的方法
@@ -148,6 +149,18 @@ fontLoader.load('./assets/fonts/gentilis_bold.typeface.json', (font) => {
 })
 // #endregion
 
+// #region 3D Model
+let Model3D: THREE.Group
+const loader = new GLTFLoader()
+loader.load('../assets/models/shiba/scene.gltf', (gltf) => {
+  Model3D = gltf.scene
+  Model3D.scale.set(5, 5, 5)
+  testCases.find(item => item.name === '3dModel')!.elem = Model3D
+}, undefined, (error) => {
+  console.error(error)
+})
+// #endregion
+
 interface TestCase {
   name: string
   elem: THREE.Object3D
@@ -178,13 +191,13 @@ onUnmounted(() => {
         {{ item.name }}
       </button>
     </li>
-    <li>
+    <!-- <li>
       <input
         v-model="textColor"
         type="color"
         value="#FF0000"
       >
-    </li>
+    </li> -->
   </ul>
 </template>
 
