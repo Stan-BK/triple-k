@@ -21,6 +21,8 @@ export class SceneFactory {
 
   setSize(width: number, height: number) {
     this.renderer.setSize(width, height)
+    this.camera.aspect = width / height
+    this.camera.updateProjectionMatrix()
   }
 
   animate() {
