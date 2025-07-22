@@ -28,13 +28,15 @@ export default function useText(testCases: TestCase[], group: THREE.Group) {
 
     // 创建材质并保存引用
     textMaterials = [
-      new THREE.MeshPhongMaterial({ color: 0xFF0000, emissive: 0xFF0000, flatShading: true }),
-      new THREE.MeshPhongMaterial({ color: 0xFF0000, emissive: 0x330000 }),
+      new THREE.MeshPhongMaterial({ color: 0x6C757D, emissive: 0x6C757D, flatShading: true }),
+      new THREE.MeshPhongMaterial({ color: 0x6C757D, emissive: 0x330000 }),
     ]
 
     textMesh = new THREE.Mesh(textGeometry, textMaterials)
 
     textMesh.position.set(0, 0, 0)
+    textMesh.receiveShadow = true
+    textMesh.castShadow = true
 
     testCases.push({
       name: 'text',

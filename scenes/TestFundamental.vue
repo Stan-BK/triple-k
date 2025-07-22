@@ -6,8 +6,10 @@ import { SceneFactory } from '@/constructors/factory'
 import use3DModel from '@/models/3D_Model'
 import useCube from '@/models/cube'
 import useLine from '@/models/line'
+import usePlane from '@/models/plane'
 import useText from '@/models/text'
 import * as THREE from 'three'
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min'
 import { onUnmounted, shallowReactive } from 'vue'
 import '@/assets/styles/index.less'
 
@@ -66,19 +68,26 @@ mainScene.active(() => {
   group.rotation.y += (targetRotationY - group.rotation.y) * 0.05
 })
 
-mainScene.renderer.setClearColor(0xAAAAAA)
+mainScene.renderer.setClearColor(0x3A3A3A)
 
 // #region Light
 // 添加光源
-const ambientLight = new THREE.AmbientLight(0xAAAAAA, 2) // 环境光
-mainScene.addGameObject(ambientLight)
+// const ambientLight = new THREE.AmbientLight(0xAAAAAA, 2) // 环境光
+// mainScene.addGameObject(ambientLight)
 
-const directionalLight = new THREE.DirectionalLight(0x000000, 1) // 平行光
-directionalLight.position.set(1, 1, 1)
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1) // 平行光
+directionalLight.position.set(0, 0, 10)
+directionalLight.target.position.set(0, 0, 0)
+directionalLight.shadow.camera.left = -20
+directionalLight.shadow.camera.right = 20
+directionalLight.shadow.camera.top = 20
+directionalLight.shadow.camera.bottom = -20
+directionalLight.castShadow = true
 mainScene.addGameObject(directionalLight)
 // #endregion
 
 const testCases = shallowReactive<TestCase[]>([])
+usePlane(mainScene)
 useLine(testCases)
 useCube(testCases, mainScene)
 useText(testCases, group)

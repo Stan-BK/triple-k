@@ -15,6 +15,7 @@ export class SceneFactory {
     )
 
     this.renderer = new THREE.WebGLRenderer()
+    this.renderer.shadowMap.enabled = true
     this.setSize(window.innerWidth, window.innerHeight)
     document.body.appendChild(this.renderer.domElement)
   }
